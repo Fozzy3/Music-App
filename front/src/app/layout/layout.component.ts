@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ConnectionService } from '../services/connection.service';
 
 @Component({
   selector: 'app-layout',
@@ -7,4 +8,14 @@ import { Component } from '@angular/core';
 })
 export class LayoutComponent {
 
+
+  constructor(private connService: ConnectionService){}
+
+  ngOnInit(){
+    this.connService.getData().subscribe({
+      next: (response) => {
+        console.log(response)
+      }
+    })
+  }
 }
