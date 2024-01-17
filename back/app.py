@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from routes.routes import user
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 app.include_router(user)
@@ -13,4 +14,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
