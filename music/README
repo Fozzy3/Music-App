@@ -1,0 +1,72 @@
+# Instrucciones para Ejecutar el Proyecto
+
+Este repositorio contiene un proyecto desarrollado con FastAPI y utiliza Conda para gestionar las dependencias. A continuación, se proporcionan instrucciones paso a paso para configurar y ejecutar el ambiente de desarrollo.
+
+## Requisitos Previos
+
+Asegúrate de tener [Conda](https://docs.conda.io/en/latest/) instalado en tu sistema antes de comenzar.
+
+## Configuración del Entorno
+
+1. **Crear un entorno virtual con Conda:**
+
+    ```bash
+    conda create --name nombre_del_entorno python=3.8
+    ```
+
+2. **Activar el entorno virtual:**
+
+    - En Windows:
+
+        ```bash
+        conda activate nombre_del_entorno
+        ```
+
+    - En macOS/Linux:
+
+        ```bash
+        source activate nombre_del_entorno
+        ```
+
+3. **Instalar las dependencias:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Ejecutar el Proyecto
+
+1. **Ejecutar la aplicación con Uvicorn:**
+
+    ```bash
+    uvicorn app:app --reload
+    ```
+
+    - `app:app` hace referencia al archivo `app.py` y la instancia de la aplicación FastAPI llamada `app`.
+    - `--reload` permite reiniciar automáticamente el servidor cuando detecta cambios en el código.
+
+2. **Acceder a la Aplicación:**
+
+    Abre tu navegador web y visita [http://localhost:8000](http://localhost:8000) para interactuar con la aplicación.
+
+## Detener la Aplicación
+
+Para detener la aplicación, simplemente presiona `Ctrl + C` en la terminal donde se está ejecutando Uvicorn.
+
+## Desactivar el Entorno Virtual
+
+Una vez que hayas terminado de trabajar con la aplicación, puedes desactivar el entorno virtual con el siguiente comando:
+
+- En Windows:
+
+    ```bash
+    conda deactivate
+    ```
+
+- En macOS/Linux:
+
+    ```bash
+    source deactivate
+    ```
+
+¡Ahora deberías tener el ambiente configurado y la aplicación en funcionamiento! Sigue estas instrucciones cada vez que quieras ejecutar el proyecto en tu máquina local.
