@@ -1,6 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from 'src/environments/enviorment';
+import { environment } from '../environments/enviorment';
+import { HttpClientModule } from '@angular/common/http';
+
 
 const options = {
   headers: new HttpHeaders({
@@ -13,7 +15,7 @@ const options = {
 })
 export class ConnectionService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, public httpClient: HttpClientModule) { }
 
 
   getData(){
