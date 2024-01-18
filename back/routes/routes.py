@@ -4,8 +4,6 @@ from models.user import users
 from schemas.user import User
 from fastapi.responses import JSONResponse
 from cryptography.fernet import Fernet
-from services.spotify_funtions import get_spotify_data
-from schemas.spotify_data import SpotifyDataResponse
 
 key = Fernet.generate_key()
 f = Fernet(key)
@@ -77,7 +75,7 @@ def update_user(user_id: int, updated_user: User):
 
     return {"success": "true", "message": "User updated successfully", "data": updated_user_dict}
     
-@user.get("/spotify_albums/{artist_name}", response_model=SpotifyDataResponse, tags=["Spotify"])
+@user.get("/spotify_albums/{artist_name}", tags=["Spotify"])
 def get_spotify_data_route(artist_name: str):
     try:
         spotify_data = get_spotify_data(artist_name)
