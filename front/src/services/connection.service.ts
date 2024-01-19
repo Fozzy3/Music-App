@@ -18,8 +18,16 @@ export class ConnectionService {
   constructor(private http: HttpClient, public httpClient: HttpClientModule) { }
 
 
-  getData(){
-    return this.http.get(`${environment.API_URL}/users`);
+  getArtist(artist_name: any){
+    return this.http.get(`${environment.API_URL}/spotify_artists/${artist_name}`);
+  }
+
+  getAlbum(id_artist: any){
+    return this.http.get(`${environment.API_URL}/spotify_albums/${id_artist}`);
+  }
+
+  getSongs(id_artist: any){
+    return this.http.get(`${environment.API_URL}/spotify_songs/${id_artist}`);
   }
 }
 
