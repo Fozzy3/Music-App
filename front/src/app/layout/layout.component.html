@@ -109,38 +109,36 @@
       [rowsPerPageOptions]="[5, 10, 20]">
       <ng-template pTemplate="header">
         <tr>
-          <!-- <th style="width: 10%">ID del Álbum</th> -->
-          <th style="width: 20%">Nombre del Álbum</th>
-          <th style="width: 10%">Tipo de Álbum</th>
-          <th style="width: 10%">Fecha de Lanzamiento</th>
-          <!-- <th style="width: 10%">Mercados Disponibles</th> -->
-          <th style="width: 10%">Núm. de Mercados Disponibles</th>
-          <th style="width: 10%">Popularidad</th>
-          <th style="width: 10%">Imagen de Portada</th>
-          <th style="width: 10%">UPC</th>
-          <th style="width: 10%">Derechos de Autor C</th>
-          <th style="width: 20%">Derechos de Autor P</th>
-          <!-- <th style="width: 10%">ID del Artista</th> -->
+          <th style="width: 10%" >Nombre de la Canción</th>
+          <th style="width: 10%" >Intérprete</th>
+          <th style="width: 10%" >Compositores</th>
+          <th style="width: 10%" >Productores</th>
+          <th style="width: 10%" >Duración</th>
+          <th style="width: 10%" >Fecha de Lanzamiento</th>
+          <th style="width: 10%" >Popularidad</th>
+          <th style="width: 10%" >Spotify</th>
+          <th style="width: 10%" >iTunes</th>
+          <th style="width: 10%" >Tidal</th>
+          <th style="width: 10%" >Amazon</th>
+          <th style="width: 10%" >Deezer</th>
+          <th style="width: 10%" >YouTube</th>
         </tr>
       </ng-template>
-      <ng-template pTemplate="body" let-album>
+      <ng-template pTemplate="body" let-song>
         <tr>
-          <!-- <td>{{ album.album_id }}</td> -->
-          <td>{{ album.album_name }}</td>
-          <td>{{ album.album_type }}</td>
-          <td>{{ album.release_date }}</td>
-          <!-- <td>{{ album.available_markets }}</td> -->
-          <td>{{ album.num_available_markets }}</td>
-          <td>{{ album.popularity }}</td>
-          <td class="break">
-            <a href="{{ album.cover_image }}">
-              <img class="cover" src="{{ album.cover_image }}" alt="Album Cover">
-            </a>
-          </td>
-          <td>{{ album.upc }}</td>
-          <td>{{ album.copyright_c }}</td>
-          <td>{{ album.copyright_p }}</td>
-          <!-- <td>{{ album.artist_id }}</td> -->
+          <td>{{ song.song_name }}</td>
+          <td>{{ song.interpreters_name }}</td>
+          <td>{{ song.composers_name }}</td>
+          <td>{{ song.producers_name }}</td>
+          <td>{{ song.duration }}</td>
+          <td>{{ song.release_date }}</td>
+          <td>{{ song.popularity }}</td>
+          <td><a href="{{ song.spotify_url }}" target="_blank">Spotify</a></td>
+          <td><a href="{{ song.itunes_link }}" target="_blank">iTunes</a></td>
+          <td><a href="{{ song.tidal_link }}" target="_blank">Tidal</a></td>
+          <td><a href="{{ song.amazon_link }}" target="_blank">Amazon</a></td>
+          <td><a href="{{ song.deezer_link }}" target="_blank">Deezer</a></td>
+          <td><a href="{{ song.youtube_link }}" target="_blank">YouTube</a></td>
         </tr>
       </ng-template>
       <ng-template pTemplate="paginatorleft">
