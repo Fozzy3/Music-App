@@ -1,49 +1,164 @@
 from sqlalchemy.orm import sessionmaker
 from models.user import table_artists, table_albums, table_songs
-from config.db import meta, engine
-from services.spotify_funtions import get_albums, get_artist, get_songs
-from schemas.spotify_data import ArtistInfo, AlbumInfo, SongInfo
-from typing import Dict
-
+from config.db import engine
+from services.spotify_funtions import get_albums, get_artist, get_songs, get_token
 
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-#def save_artist_data_to_db(artist_name, data):
-#    db = SessionLocal()
-#    db_spotify_data = SpotifyData(artist_name=artist_name, data=data)
-#    db.add(db_spotify_data)
-#    db.commit()
-#    db.refresh(db_spotify_data)
+def get_artist_data(artist_name):
+        try:
+                # Obtén el token
+                token = get_token()
+                                                
+                # Llama a la función get_artist
+                artists = get_artist(token, artist_name)
+                artist_info = []
+                                                
+                for artist in artists:
+                        artist_data = {
+                                'artist_id': artist['artist_id'],
+                                'artist_name': artist['artist_name'],
+                                'popularity': artist['popularity'],
+                                'followers': artist['followers']
+                        }
+                        artist_info.append(artist_data)
 
-#def get_spotify_data(artist_name):
-#    try:
-#        token = get_token()
-#        result = artist(token, artist_name)
-#        if not result:
-#            return {"error": f"No se encontró el artista con el nombre {artist_name}"}
+                return artist_info
+        except Exception as e:
+                return {
+                "artista": [{
+                        'artist_id': None,
+                        'artist_name': None,
+                        'popularity': None,
+                        'followers': None,
+                        'error': str(e)
+                }]
+                }
+                        
+def get_album_data(artist_id):
+        try:
+                # Obtén el token
+                token = get_token()
+                                
+                # Llama a la función get_albums
+                albums = get_albums(token, artist_id)
+                print("fase2albu",albums)
+                album_info = []
+                print("fase2albu",albums)
+                                
+                for album in albums:
+                        album_data = {
+                                'album_id': album['album_id'],
+                                'album_name': album['album_name'],
+                                'album_type': album['album_type'],
+                                'release_date': album['release_date'],
+                                'available_markets': album['available_markets'],
+                                'num_available_markets': album['num_available_markets'],
+                                'genres': album['genres'],
+                                'popularity': album['popularity'],
+                                'cover_image': album['cover_image'],
+                                'upc': album['upc'],
+                                'copyright_c': album['copyright_c'],
+                                'copyright_p': album['copyright_p'],
+                                'artist_id': album['artist_id']
+                        }
+                        album_info.append(album_data)
+                print("fase2albu",album_data)
 
-#        artist_id = result["id"]
-#        albums = get_albums(token, artist_id)
-#        albums_info = []
+                return album_info
+        except Exception as e:
+                return {"error": str(e)}
 
-#        for idx, album in enumerate(albums):
-#            album_data = {
-#                'index': idx + 1,
-#                'name': album['name'],
-#                'release_date': album['release_date'],
-#                'album_type': album['album_type'],
-#                'available_markets': album['available_markets'],
-#                'copyright_holders': album['copyright_holders'],
-#                'upc': album['upc']
-#            }
-#            albums_info.append(album_data)
+def get_song_data(album_id):
+        try:
+                # Obtén el token
+                token = get_token()
+                                
+                # Llama a la función get_songs
+                songs = get_songs(token, album_id)
+                song_info = []
+                                
+                for song in songs:
+                        song_data = {
+                                'song_id': song['song_id'],
+                                'song_name': song['song_name'],
+                                'interpreters_name': song['interpreters_name'],
+                                'composers_name': song['composers_name'],
+                                'producers_name': song['producers_name'],
+                                'duration': song['duration'],
+                                'release_year': song['release_year'],
+                                'isrc': song['isrc'],
+                                'popularity': song['popularity'],
+                                'spotify_url': song['spotify_url'],
+                                'itunes_link': song['itunes_link'],
+                                'tidal_link': song['tidal_link'],
+                                'amazon_link': song['amazon_link'],
+                                'deezer_link': song['deezer_link'],
+                                'youtube_link': song['youtube_link'],
+                                'album_id': song['album_id']
+                        }
+                        song_info.append(song_data)
 
-        # Guarda los resultados en la base de datos
-#       save_spotify_data_to_db(artist_name, {"artist_info": result, "albums": albums_info})
+                return song_info
+        except Exception as e:
+                return {"error": str(e)}
 
-#        return {"artist_info": result, "albums": albums_info}
-#    except Exception as e:
-#        return {"error": str(e)}
-    
-    
+#Guardado de datos en la base de datos
+
+def save_artist_data_to_db(artist_data):
+        db = SessionLocal()
+        db_artist_data = table_artists(
+                artist_id=artist_data['artist_id'], 
+                artist_name=artist_data['artist_name'],
+                popularity=artist_data['popularity'],
+                followers=artist_data['followers']
+        )
+        db.add(db_artist_data)
+        db.commit()
+        db.refresh(db_artist_data)
+
+def save_album_data_to_db(album_data):
+        db = SessionLocal()
+        db_album_data = table_albums(
+                album_id=album_data['album_id'], 
+                album_name=album_data['album_name'],
+                album_type=album_data['album_type'],
+                release_date=album_data['release_date'],
+                available_markets=album_data['available_markets'],
+                num_available_markets=album_data['num_available_markets'],
+                genres=album_data['genres'],
+                popularity=album_data['popularity'],
+                cover_image=album_data['cover_image'],
+                upc=album_data['upc'],
+                copyright_c=album_data['copyright_c'],
+                copyright_p=album_data['copyright_p'],
+                artist_id=album_data['artist_id']
+        )
+        db.add(db_album_data)
+        db.commit()
+        db.refresh(db_album_data)
+
+def save_song_data_to_db(song_data):
+        db = SessionLocal()
+        db_song_data = table_songs(
+                song_id=song_data['song_id'], 
+                song_name=song_data['song_name'],
+                interpreters_name=song_data['interpreters_name'],
+                composers_name=song_data['composers_name'],
+                producers_name=song_data['producers_name'],
+                duration=song_data['duration'],
+                release_year=song_data['release_year'],
+                isrc=song_data['isrc'],
+                popularity=song_data['popularity'],
+                spotify_url=song_data['spotify_url'],
+                itunes_link=song_data['itunes_link'],
+                tidal_link=song_data['tidal_link'],
+                amazon_link=song_data['amazon_link'],
+                deezer_link=song_data['deezer_link'],
+                youtube_link=song_data['youtube_link'],
+                album_id=song_data['album_id']
+        )
+        db.add(db_song_data)
+        db.commit()
+        db.refresh(db_song_data)

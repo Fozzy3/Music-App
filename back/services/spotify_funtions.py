@@ -126,6 +126,7 @@ def get_albums(token, artist_id):
         }
 
         albums_info.append(album_data)
+    print("fase1albu",albums_info)
 
     return albums_info
 

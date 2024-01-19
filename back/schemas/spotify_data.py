@@ -1,6 +1,8 @@
+from fastapi import FastAPI
 from typing import List
 from pydantic import BaseModel
 
+music = FastAPI()
 class ArtistInfo(BaseModel):
     artist_id: str
     artist_name: str
