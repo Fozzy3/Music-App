@@ -8,7 +8,11 @@
 
 <div class="container">
   <div class="artist">
-    <input pInputText type="text" class="p-inputtext-lg" placeholder="artista..." [(ngModel)]="artist" />
+    <div class="input-artist">
+      <input pInputText type="text" class="p-inputtext-lg" placeholder="artista..." [(ngModel)]="artist" />
+      <small id="username-help">Puedes buscar por artista o nombre de una canción.</small>
+    </div>
+
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
     <p-button (onClick)="searchArt($event)" icon="pi pi-search" [rounded]="true" severity="success"></p-button>
@@ -19,29 +23,32 @@
 
   <div class="card">
     <p-table [value]="artistData" [tableStyle]="{ 'min-width': '50rem' }">
-        <ng-template pTemplate="header">
-            <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>Seguidores</th>
-                <th>Popularidad</th>
-                <th>Álbumes</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-product>
-            <tr>
-                <td>{{ product.artist_id }}</td>
-                <td>{{ product.artist_name }}</td>
-                <td>{{ product.followers }}</td>
-                <td>{{ product.popularity }}</td>
-                <td><p-button (onClick)="searchAlbum($event, product.artist_id)" icon="pi pi-search" severity="success"></p-button></td>
-            </tr>
-        </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Id</th>
+          <th>Nombre</th>
+          <th>Seguidores</th>
+          <th>Popularidad</th>
+          <th>Álbumes</th>
+          <th>Canciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-product>
+        <tr>
+          <td>{{ product.artist_id }}</td>
+          <td>{{ product.artist_name }}</td>
+          <td>{{ product.followers }}</td>
+          <td>{{ product.popularity }}</td>
+          <td><p-button (onClick)="search($event, product.artist_id, 'álbumes')" icon="pi pi-search"
+              severity="success"></p-button>
+          </td>
+          <td><p-button (onClick)="search($event, product.artist_id, 'canciones')" icon="pi pi-search"
+              severity="success"></p-button>
+          </td>
+        </tr>
+      </ng-template>
     </p-table>
   </div>
-
-
-
 
   <h1>Álbumes</h1>
   <div class="card">
@@ -51,7 +58,7 @@
       [rowsPerPageOptions]="[5, 10, 20]">
       <ng-template pTemplate="header">
         <tr>
-          <th style="width: 10%">ID del Álbum</th>
+          <!-- <th style="width: 10%">ID del Álbum</th> -->
           <th style="width: 20%">Nombre del Álbum</th>
           <th style="width: 10%">Tipo de Álbum</th>
           <th style="width: 10%">Fecha de Lanzamiento</th>
@@ -62,23 +69,27 @@
           <th style="width: 10%">UPC</th>
           <th style="width: 10%">Derechos de Autor C</th>
           <th style="width: 20%">Derechos de Autor P</th>
-          <th style="width: 10%">ID del Artista</th>
+          <!-- <th style="width: 10%">ID del Artista</th> -->
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-album>
         <tr>
-          <td>{{ album.album_id }}</td>
+          <!-- <td>{{ album.album_id }}</td> -->
           <td>{{ album.album_name }}</td>
           <td>{{ album.album_type }}</td>
           <td>{{ album.release_date }}</td>
           <!-- <td>{{ album.available_markets }}</td> -->
           <td>{{ album.num_available_markets }}</td>
           <td>{{ album.popularity }}</td>
-          <td class="break">{{ album.cover_image }}</td>
+          <td class="break">
+            <a href="{{ album.cover_image }}">
+              <img class="cover" src="{{ album.cover_image }}" alt="Album Cover">
+            </a>
+          </td>
           <td>{{ album.upc }}</td>
           <td>{{ album.copyright_c }}</td>
           <td>{{ album.copyright_p }}</td>
-          <td>{{ album.artist_id }}</td>
+          <!-- <td>{{ album.artist_id }}</td> -->
         </tr>
       </ng-template>
       <ng-template pTemplate="paginatorleft">
@@ -89,4 +100,56 @@
       </ng-template>
     </p-table>
   </div>
+
+  <h1>Canciones</h1>
+  <div class="card">
+    <p-table [value]="songsData" [paginator]="true" [rows]="5" [showCurrentPageReport]="true"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [rowsPerPageOptions]="[5, 10, 20]">
+      <ng-template pTemplate="header">
+        <tr>
+          <!-- <th style="width: 10%">ID del Álbum</th> -->
+          <th style="width: 20%">Nombre del Álbum</th>
+          <th style="width: 10%">Tipo de Álbum</th>
+          <th style="width: 10%">Fecha de Lanzamiento</th>
+          <!-- <th style="width: 10%">Mercados Disponibles</th> -->
+          <th style="width: 10%">Núm. de Mercados Disponibles</th>
+          <th style="width: 10%">Popularidad</th>
+          <th style="width: 10%">Imagen de Portada</th>
+          <th style="width: 10%">UPC</th>
+          <th style="width: 10%">Derechos de Autor C</th>
+          <th style="width: 20%">Derechos de Autor P</th>
+          <!-- <th style="width: 10%">ID del Artista</th> -->
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-album>
+        <tr>
+          <!-- <td>{{ album.album_id }}</td> -->
+          <td>{{ album.album_name }}</td>
+          <td>{{ album.album_type }}</td>
+          <td>{{ album.release_date }}</td>
+          <!-- <td>{{ album.available_markets }}</td> -->
+          <td>{{ album.num_available_markets }}</td>
+          <td>{{ album.popularity }}</td>
+          <td class="break">
+            <a href="{{ album.cover_image }}">
+              <img class="cover" src="{{ album.cover_image }}" alt="Album Cover">
+            </a>
+          </td>
+          <td>{{ album.upc }}</td>
+          <td>{{ album.copyright_c }}</td>
+          <td>{{ album.copyright_p }}</td>
+          <!-- <td>{{ album.artist_id }}</td> -->
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="paginatorleft">
+        <p-button type="button" icon="pi pi-plus" styleClass="p-button-text"></p-button>
+      </ng-template>
+      <ng-template pTemplate="paginatorright">
+        <p-button type="button" icon="pi pi-cloud" styleClass="p-button-text"></p-button>
+      </ng-template>
+    </p-table>
+  </div>
+
 </div>

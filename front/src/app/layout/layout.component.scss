@@ -12,3 +12,15 @@
 .break{
   word-wrap: break-word;
 }
+
+.input-artist{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.cover{
+  width: 125px;
+  height: 125px;
+}

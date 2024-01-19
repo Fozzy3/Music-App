@@ -51,6 +51,7 @@ export class LayoutComponent {
   artist: any = null;
   artistData: any = null;
   albumData: any = null;
+  songsData: any = null;
 
   constructor(
     private connService: ConnectionService,
@@ -64,7 +65,7 @@ export class LayoutComponent {
     this.artist = null;
     this.artistData = null;
     this.albumData = null;
-
+    this.songsData = null;
   }
   searchArt(event: Event) {
     this.confirmationService.confirm({
@@ -111,7 +112,7 @@ export class LayoutComponent {
     });
   }
 
-  searchAlm(id: any) {
+  searchAlbum(id: any) {
     this.connService.getAlbum(id).subscribe({
       next: (response) => {
         if (response) {
@@ -132,10 +133,31 @@ export class LayoutComponent {
     });
   }
 
-  searchAlbum(event: Event, id: String) {
+  searchSong(id: any) {
+    this.connService.getSongs(id).subscribe({
+      next: (response) => {
+        if (response) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Artista encontrado',
+            detail: '',
+          });
+          this.songsData = response;
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Artista no encontrado',
+            detail: 'Pruebe con otro nombre',
+          });
+        }
+      },
+    });
+  }
+
+  search(event: Event, id: String, type: String) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: 'Esta seguro de buscar álbumes del artista?, puede tardar un poco',
+      message: `Esta seguro de buscar ${type} del artista?, puede tardar un poco`,
       header: 'Confirmación',
       icon: 'pi pi-exclamation-triangle',
       acceptIcon: 'none',
@@ -143,7 +165,11 @@ export class LayoutComponent {
       rejectButtonStyleClass: 'p-button-text',
       accept: () => {
         if (this.artist) {
-          this.searchAlm(id);
+          if(type == "álbumes"){
+            this.searchAlbum(id);
+          }else if(type == "canciones"){
+            this.searchSong(id);
+          }
         }
       },
       reject: () => {},

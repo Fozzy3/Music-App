@@ -25,6 +25,10 @@ export class ConnectionService {
   getAlbum(id_artist: any){
     return this.http.get(`${environment.API_URL}/spotify_albums/${id_artist}`);
   }
+
+  getSongs(id_artist: any){
+    return this.http.get(`${environment.API_URL}/spotify_songs/${id_artist}`);
+  }
 }
 
 
