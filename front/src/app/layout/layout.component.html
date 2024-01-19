@@ -1,4 +1,17 @@
-<p>layout works!</p>
+
+<div class="card">
+  <p-menubar [model]="items">
+      <ng-template pTemplate="start">
+          <img src="../../assets/img/logo.png" height="40" />
+      </ng-template>
+  </p-menubar>
+</div>
+
+<div class="p-5 m-5">
+
+  <input pInputText type="text" class="p-inputtext-lg" placeholder="Large" [(ngModel)]="searchArtist" />
+
+</div>
 
 
 <div class="card">
