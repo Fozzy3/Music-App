@@ -82,13 +82,13 @@ def get_album_data(artist_id):
                 }]
                 }
 
-def get_song_data(album_id):
+def get_song_data(artist_id):
         try:
                 # Obtén el token
                 token = get_token()
                                 
                 # Llama a la función get_songs
-                songs = get_songs(token, album_id)
+                songs = get_songs(token, artist_id)
                 song_info = []
                                 
                 for song in songs:
@@ -99,7 +99,7 @@ def get_song_data(album_id):
                                 'composers_name': song['composers_name'],
                                 'producers_name': song['producers_name'],
                                 'duration': song['duration'],
-                                'release_year': song['release_year'],
+                                'release_date': song['release_date'],
                                 'isrc': song['isrc'],
                                 'popularity': song['popularity'],
                                 'spotify_url': song['spotify_url'],
@@ -114,7 +114,27 @@ def get_song_data(album_id):
 
                 return song_info
         except Exception as e:
-                return {"error": str(e)}
+                return {
+                        "song": [{
+                        'song_id': None,
+                        'song_name': None,
+                        'interpreters_name': None,
+                        'composers_name': None,
+                        'producers_name': None,
+                        'duration': None,
+                        'release_date': None,
+                        'isrc': None,
+                        'popularity': None,
+                        'spotify_url': None,
+                        'itunes_link': None,
+                        'tidal_link': None,
+                        'amazon_link': None,
+                        'deezer_link': None,
+                        'youtube_link': None,
+                        'album_id': None,
+                        'error': str(e)
+                }]
+                }
 
 #Guardado de datos en la base de datos
 

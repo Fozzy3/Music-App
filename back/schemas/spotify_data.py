@@ -30,7 +30,7 @@ class SongInfo(BaseModel):
     composers_name: str
     producers_name: str
     duration: int
-    release_year: int
+    release_date: str
     isrc: str
     popularity: int
     spotify_url: str

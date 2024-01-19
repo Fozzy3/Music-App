@@ -183,18 +183,17 @@ def get_songs(token, artist_id):
                 'composers_name': 'N/A', # Spotify API does not provide composer information
                 'producers_name': 'N/A', # Spotify API does not provide composer information
                 'duration': track['duration_ms'],
-                'release_year': album['release_date'][:4],
+                'release_date': album['release_date'],
                 'isrc': isrc,
                 'popularity': track_details['popularity'],
                 'spotify_url': spotify_url,
-                'itunes_link': song_links.get('itunes_link'),
-                'tidal_link': song_links.get('tidal_link'),
-                'amazon_link': song_links.get('amazon_link'),
-                'deezer_link': song_links.get('deezer_link'),
-                'youtube_link': song_links.get('youtube_link'),
+                'itunes_link': song_links['itunes_link'] if song_links['itunes_link'] else 'N/A',
+                'tidal_link': song_links['tidal_link'] if song_links['tidal_link'] else 'N/A',
+                'amazon_link': song_links['amazon_link'] if song_links['amazon_link'] else 'N/A',
+                'deezer_link': song_links['deezer_link'] if song_links['deezer_link'] else 'N/A',
+                'youtube_link': song_links['youtube_link'] if song_links['youtube_link'] else 'N/A',
                 'album_id': album_id
             }
-
             songs_info.append(song_data)
 
     return songs_info
