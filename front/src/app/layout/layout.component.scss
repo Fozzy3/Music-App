@@ -1,0 +1,14 @@
+.artist{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 3rem 0px;
+
+  input, p-button{
+    margin: 0px 1rem;
+  }
+}
+
+.break{
+  word-wrap: break-word;
+}

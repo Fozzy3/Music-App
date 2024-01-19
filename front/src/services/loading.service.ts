@@ -9,15 +9,12 @@ import { BehaviorSubject } from 'rxjs';
 export class LoadingService {
   private loadingSubject = new BehaviorSubject<boolean>(false);
   loading$ = this.loadingSubject.asObservable();
-  loadingText$ = new BehaviorSubject<string>('');
 
-  showLoading(text: string = 'Cargando...') {
-    this.loadingText$.next(text);
+  showLoading() {
     this.loadingSubject.next(true);
   }
 
   hideLoading() {
-    this.loadingText$.next('');
     this.loadingSubject.next(false);
   }
 }

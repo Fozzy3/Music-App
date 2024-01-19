@@ -5,152 +5,149 @@ import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
-
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [TableModule, ButtonModule, MenubarModule, InputTextModule, FormsModule],
+  imports: [
+    TableModule,
+    ButtonModule,
+    MenubarModule,
+    InputTextModule,
+    FormsModule,
+    ConfirmDialogModule,
+    ToastModule,
+  ],
   templateUrl: './layout.component.html',
-  styleUrl: './layout.component.scss'
+  styleUrl: './layout.component.scss',
 })
 export class LayoutComponent {
-
-
-  searchArtist: any = null;
-  customers:any;
-  items: any;
-
-  constructor(private connService: ConnectionService){}
-
-  ngOnInit(){
-    this.connService.getData().subscribe({
-      next: (response) => {
-          console.log(response)
-      },
-    })
-    this.items = [
-      {
-          label: 'File',
-          icon: 'pi pi-fw pi-file',
-          items: [
-              {
-                  label: 'New',
-                  icon: 'pi pi-fw pi-plus',
-                  items: [
-                      {
-                          label: 'Bookmark',
-                          icon: 'pi pi-fw pi-bookmark'
-                      },
-                      {
-                          label: 'Video',
-                          icon: 'pi pi-fw pi-video'
-                      }
-                  ]
-              },
-              {
-                  label: 'Delete',
-                  icon: 'pi pi-fw pi-trash'
-              },
-              {
-                  separator: true
-              },
-              {
-                  label: 'Export',
-                  icon: 'pi pi-fw pi-external-link'
-              }
-          ]
-      },
-      {
-          label: 'Edit',
-          icon: 'pi pi-fw pi-pencil',
-          items: [
-              {
-                  label: 'Left',
-                  icon: 'pi pi-fw pi-align-left'
-              },
-              {
-                  label: 'Right',
-                  icon: 'pi pi-fw pi-align-right'
-              },
-              {
-                  label: 'Center',
-                  icon: 'pi pi-fw pi-align-center'
-              },
-              {
-                  label: 'Justify',
-                  icon: 'pi pi-fw pi-align-justify'
-              }
-          ]
-      },
-      {
-          label: 'Users',
-          icon: 'pi pi-fw pi-user',
-          items: [
-              {
-                  label: 'New',
-                  icon: 'pi pi-fw pi-user-plus'
-              },
-              {
-                  label: 'Delete',
-                  icon: 'pi pi-fw pi-user-minus'
-              },
-              {
-                  label: 'Search',
-                  icon: 'pi pi-fw pi-users',
-                  items: [
-                      {
-                          label: 'Filter',
-                          icon: 'pi pi-fw pi-filter',
-                          items: [
-                              {
-                                  label: 'Print',
-                                  icon: 'pi pi-fw pi-print'
-                              }
-                          ]
-                      },
-                      {
-                          icon: 'pi pi-fw pi-bars',
-                          label: 'List'
-                      }
-                  ]
-              }
-          ]
-      },
-      {
-          label: 'Events',
-          icon: 'pi pi-fw pi-calendar',
-          items: [
-              {
-                  label: 'Edit',
-                  icon: 'pi pi-fw pi-pencil',
-                  items: [
-                      {
-                          label: 'Save',
-                          icon: 'pi pi-fw pi-calendar-plus'
-                      },
-                      {
-                          label: 'Delete',
-                          icon: 'pi pi-fw pi-calendar-minus'
-                      }
-                  ]
-              },
-              {
-                  label: 'Archieve',
-                  icon: 'pi pi-fw pi-calendar-times',
-                  items: [
-                      {
-                          label: 'Remove',
-                          icon: 'pi pi-fw pi-calendar-minus'
-                      }
-                  ]
-              }
-          ]
-      },
-      {
-          label: 'Quit',
-          icon: 'pi pi-fw pi-power-off'
-      }
+  items: any[] = [
+    {
+      label: 'File',
+      icon: 'pi pi-fw pi-file',
+    },
+    {
+      label: 'Edit',
+      icon: 'pi pi-fw pi-pencil',
+    },
+    {
+      label: 'Users',
+      icon: 'pi pi-fw pi-user',
+    },
+    {
+      label: 'Events',
+      icon: 'pi pi-fw pi-calendar',
+    },
+    {
+      label: 'Quit',
+      icon: 'pi pi-fw pi-power-off',
+    },
   ];
+
+  artist: any = null;
+  artistData: any = null;
+  albumData: any = null;
+
+  constructor(
+    private connService: ConnectionService,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
+  ) {}
+
+  ngOnInit() {}
+
+  clear(){
+    this.artist = null;
+    this.artistData = null;
+    this.albumData = null;
+
   }
+  searchArt(event: Event) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Esta seguro del artista a buscar?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: 'none',
+      rejectIcon: 'none',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        if (this.artist) {
+          this.searchArtist();
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'El campo no puede estar vació',
+            detail: 'Por favor ingrese un artista',
+          });
+        }
+      },
+      reject: () => {},
+    });
+  }
+
+  searchArtist() {
+    this.connService.getArtist(this.artist).subscribe({
+      next: (response) => {
+        if (response) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Artista encontrado',
+            detail: '',
+          });
+          this.artistData = response;
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Artista no encontrado',
+            detail: 'Pruebe con otro nombre',
+          });
+        }
+      },
+    });
+  }
+
+  searchAlm(id: any) {
+    this.connService.getAlbum(id).subscribe({
+      next: (response) => {
+        if (response) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Artista encontrado',
+            detail: '',
+          });
+          this.albumData = response;
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Artista no encontrado',
+            detail: 'Pruebe con otro nombre',
+          });
+        }
+      },
+    });
+  }
+
+  searchAlbum(event: Event, id: String) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Esta seguro de buscar álbumes del artista?, puede tardar un poco',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: 'none',
+      rejectIcon: 'none',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        if (this.artist) {
+          this.searchAlm(id);
+        }
+      },
+      reject: () => {},
+    });
+  }
+
 }
