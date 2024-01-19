@@ -43,9 +43,7 @@ def get_album_data(artist_id):
                                 
                 # Llama a la función get_albums
                 albums = get_albums(token, artist_id)
-                print("fase2albu",albums)
                 album_info = []
-                print("fase2albu",albums)
                                 
                 for album in albums:
                         album_data = {
@@ -55,7 +53,6 @@ def get_album_data(artist_id):
                                 'release_date': album['release_date'],
                                 'available_markets': album['available_markets'],
                                 'num_available_markets': album['num_available_markets'],
-                                'genres': album['genres'],
                                 'popularity': album['popularity'],
                                 'cover_image': album['cover_image'],
                                 'upc': album['upc'],
@@ -64,11 +61,26 @@ def get_album_data(artist_id):
                                 'artist_id': album['artist_id']
                         }
                         album_info.append(album_data)
-                print("fase2albu",album_data)
 
                 return album_info
         except Exception as e:
-                return {"error": str(e)}
+                return {
+                        "album": [{
+                        'album_id': None,
+                        'album_name': None,
+                        'album_type': None,
+                        'release_date': None,
+                        'available_markets': None,
+                        'num_available_markets': None,
+                        'popularity': None,
+                        'cover_image': None,
+                        'upc': None,
+                        'copyright_c': None,
+                        'copyright_p': None,
+                        'artist_id': None,
+                        'error': str(e)
+                }]
+                }
 
 def get_song_data(album_id):
         try:

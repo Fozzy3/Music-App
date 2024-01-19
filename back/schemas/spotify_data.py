@@ -16,7 +16,6 @@ class AlbumInfo(BaseModel):
     release_date: str
     available_markets: List[str]
     num_available_markets: int
-    genres: List[str]
     popularity: int
     cover_image: str
     upc: str

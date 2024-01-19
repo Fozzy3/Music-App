@@ -94,7 +94,7 @@ def get_albums(token, artist_id):
         'limit': 50
     }
 
-    result = get(url, headers=headers, params=params, timeout=120)  # Add timeout argument
+    result = get(url, headers=headers, params=params)  # Add timeout argument
 
     if result.status_code != 200:
         raise requests.exceptions.HTTPError(f"Error al obtener los álbumes. Código de estado: {result.status_code}")
@@ -103,11 +103,8 @@ def get_albums(token, artist_id):
     albums_info = []
 
     for album in json_result['items']:
-        upc = get_upc_from_album_details(album['id'], headers)
-        cover_image = album['images'][0]['url'] if album['images'] else None
-
-        copyrights_c = [c['text'].split(" (C)")[0] for c in album.get('copyrights', []) if "(C)" in c['text']]
-        copyrights_p = [c['text'].split(" (P)")[0] for c in album.get('copyrights', []) if "(P)" in c['text']]
+        album_details = get_album_details(album['id'], headers)
+        cover_image = album['images'][0]['url'] if album['images'] else ''
 
         album_data = {
             'album_id': album['id'],
@@ -116,31 +113,38 @@ def get_albums(token, artist_id):
             'release_date': album['release_date'],
             'available_markets': album['available_markets'],
             'num_available_markets': len(album['available_markets']),
-            'genres': album.get('genres', []),  
-            'popularity': album['popularity'],
+            'popularity': album_details['popularity'],
             'cover_image': cover_image,
-            'upc': upc,
-            'copyright_c': copyrights_c,
-            'copyright_p': copyrights_p,
+            'upc': album_details['upc'],
+            'copyright_c': album_details['copyright_c'],
+            'copyright_p': album_details['copyright_p'],
             'artist_id': artist_id
         }
 
         albums_info.append(album_data)
-    print("fase1albu",albums_info)
 
     return albums_info
 
-def get_upc_from_album_details(album_id, headers):
+def get_album_details(album_id, headers):
     """
-    Obtiene el código UPC de los detalles de un álbum en específico de la API de Spotify.
+    Obtiene los detalles de un álbum en específico de la API de Spotify.
     """
     album_details_url = f"{os.getenv('API_SPOTIFY')}/albums/{album_id}"
 
-    album_details_result = get(album_details_url, headers=headers, timeout=120)
+    album_details_result = get(album_details_url, headers=headers)
 
     album_details = json.loads(album_details_result.content)
 
-    return album_details.get('external_ids', {}).get('upc', 'N/A')
+    copyrights = album_details.get('copyrights', [])
+    copyright_c = [c['text'] for c in copyrights if c['type'] == 'C']
+    copyright_p = [c['text'] for c in copyrights if c['type'] == 'P']
+
+    return {
+        'upc': album_details.get('external_ids', {}).get('upc', 'N/A'),
+        'popularity': album_details.get('popularity', 0),
+        'copyright_c': copyright_c,
+        'copyright_p': copyright_p,
+    }
 
 
 def get_songs(token, artist_id):
@@ -162,7 +166,7 @@ def get_songs(token, artist_id):
     for album in albums_json['items']:
         album_id = album['id']
         tracks_url = f"{os.getenv('API_SPOTIFY')}/albums/{album_id}/tracks"
-        tracks_result = requests.get(tracks_url, headers=headers, timeout=120)
+        tracks_result = requests.get(tracks_url, headers=headers)
         tracks_json = tracks_result.json()
 
         for track in tracks_json['items']:
@@ -200,7 +204,7 @@ def get_track_details(token, track_id):
     """
     Obtiene los detalles de una canción en específico de la API de Spotify.
     """
-    url = f"{os.getenv('API_SPOTIFY')}/tracks/{track_id}"    
+    url = f"{os.getenv('API_SPOTIFY')}/tracks/{track_id}" 
 
     headers = get_auth_header(token)
 

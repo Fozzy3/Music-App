@@ -17,11 +17,10 @@ def get_artist_data_route(artist_name: str):
     except Exception as e:
         return {"error": str(e)}
 
-@music.get("/spotify_albums/{artist_id}", tags=["SpotifyAlbums"])
+@music.get("/spotify_albums/{artist_id}", response_model=List[AlbumInfo], tags=["SpotifyAlbums"])
 def get_album_data_route(artist_id: str):
     try:
         album_data = get_album_data(artist_id)
-        print("fase3albu",album_data)
         return album_data
     except Exception as e:
         return {"error": str(e)}
