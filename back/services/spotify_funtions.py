@@ -5,6 +5,7 @@ import os
 from requests import post, get
 import requests
 from services.song_links import get_song_links
+from services.genius_api import get_song_info_by_name_artist
 
 
 load_dotenv()
@@ -50,42 +51,68 @@ def get_token():
 
     return token
 
-
-def get_artist(token, artist_name):
+def get_available_markets(token):
     """
-    Busqueda información sobre el artista especificado.
+    Obtiene todos los mercados disponibles de la API de Spotify.
     """
     base_url = os.getenv('API_SPOTIFY')
     if base_url is None:
         raise ValueError("La variable de entorno API_SPOTIFY no está configurada.")
     
     headers = get_auth_header(token)
-    query = f"?q={artist_name}&type=artist&limit=1"
+
+    query_url = f"{base_url}/v1/markets"
+    result = get(query_url, headers=headers, timeout=300)  
+
+    if result.status_code != 200:
+        raise requests.exceptions.HTTPError(f"Error al obtener los mercados disponibles. Código de estado: {result.status_code}")
+
+    json_result = json.loads(result.content)
+    markets = json_result.get("markets")
+
+    if markets is None:
+        raise ValueError("No se encontraron mercados en la respuesta.")
+
+    return markets
+
+def get_artists(token, artist_name, market=None):
+    """
+    Busqueda información sobre los artistas especificados.
+    """
+    base_url = os.getenv('API_SPOTIFY')
+    if base_url is None:
+        raise ValueError("La variable de entorno API_SPOTIFY no está configurada.")
+    
+    headers = get_auth_header(token)
+    query = f"?q={artist_name}&type=artist&limit=10"
+    
+    if market is not None:
+        query += f"&market={market}"
 
     query_url = f"{base_url}/search{query}"
     result = get(query_url, headers=headers, timeout=300)  
 
     if result.status_code != 200:
-        raise requests.exceptions.HTTPError(f"Error al obtener el artista. Código de estado: {result.status_code}")
+        raise requests.exceptions.HTTPError(f"Error al obtener los artistas. Código de estado: {result.status_code}")
 
     json_result = json.loads(result.content)["artists"]["items"]
     
     if len(json_result)==0:
         raise ValueError("No se encontró ningún artista con ese nombre.")
     
-    artist = json_result[0]
-    artist_info = []
+    artists_info = []
 
-    artist_data = {
-        'artist_id': artist['id'],
-        'artist_name': artist['name'],
-        'popularity': artist['popularity'],
-        'followers': artist['followers']['total']
-    }
+    for artist in json_result:
+        artist_data = {
+            'artist_id': artist['id'],
+            'artist_name': artist['name'],
+            'popularity': artist['popularity'],
+            'followers': artist['followers']['total']
+        }
 
-    artist_info.append(artist_data)
+        artists_info.append(artist_data)
 
-    return artist_info
+    return artists_info
 
 def get_albums(token, artist_id):
     """
@@ -99,34 +126,38 @@ def get_albums(token, artist_id):
         'limit': 50
     }
 
-    result = get(url, headers=headers, params=params, timeout=600)  
-
-    if result.status_code != 200:
-        raise requests.exceptions.HTTPError(f"Error al obtener los álbumes. Código de estado: {result.status_code}")
-
-    json_result = json.loads(result.content)
     albums_info = []
+    while url:
+        result = get(url, headers=headers, params=params, timeout=600)  
 
-    for album in json_result['items']:
-        album_details = get_album_details(album['id'], headers)
-        cover_image = album['images'][0]['url'] if album['images'] else ''
+        if result.status_code != 200:
+            raise requests.exceptions.HTTPError(f"Error al obtener los álbumes. Código de estado: {result.status_code}")
 
-        album_data = {
-            'album_id': album['id'],
-            'album_name': album['name'],
-            'album_type': album['album_type'],
-            'release_date': album['release_date'],
-            'available_markets': album['available_markets'],
-            'num_available_markets': len(album['available_markets']),
-            'popularity': album_details['popularity'],
-            'cover_image': cover_image,
-            'upc': album_details['upc'],
-            'copyright_c': album_details['copyright_c'],
-            'copyright_p': album_details['copyright_p'],
-            'artist_id': artist_id
-        }
+        json_result = json.loads(result.content)
 
-        albums_info.append(album_data)
+        for album in json_result['items']:
+            album_details = get_album_details(album['id'], headers)
+            cover_image = album['images'][0]['url'] if album['images'] else ''
+
+            album_data = {
+                'album_id': album['id'],
+                'album_name': album['name'],
+                'album_type': album['album_type'],
+                'release_date': album['release_date'],
+                'available_markets': album['available_markets'],
+                'num_available_markets': len(album['available_markets']),
+                'popularity': album_details['popularity'],
+                'cover_image': cover_image,
+                'upc': album_details['upc'],
+                'copyright_c': album_details['copyright_c'],
+                'copyright_p': album_details['copyright_p'],
+                'artist_id': artist_id
+            }
+
+            albums_info.append(album_data)
+
+        url = json_result['next']
+        params = {}  # Clear params for the next requests as 'next' URL already includes them
 
     return albums_info
 
@@ -152,56 +183,56 @@ def get_album_details(album_id, headers):
     }
 
 
-def get_songs(token, artist_id):
-    """
-    Obtiene una lista de canciones de un artista en específico de la API de Spotify.
-    """
-    url = f"{os.getenv('API_SPOTIFY')}/artists/{artist_id}/albums"
-    headers = get_auth_header(token)
-    params = {'include_groups': 'album,single,compilation', 'limit': 50}
+# def get_songs(token, artist_id):
+#     """
+#     Obtiene una lista de canciones de un artista en específico de la API de Spotify.
+#     """
+#     url = f"{os.getenv('API_SPOTIFY')}/artists/{artist_id}/albums"
+#     headers = get_auth_header(token)
+#     params = {'include_groups': 'album,single,compilation', 'limit': 50}
 
-    albums_result = requests.get(url, headers=headers, params=params)
+#     albums_result = requests.get(url, headers=headers, params=params)
 
-    if albums_result.status_code != 200:
-        raise requests.exceptions.HTTPError(f"Error al obtener las canciones. Código de estado: {albums_result.status_code}")
+#     if albums_result.status_code != 200:
+#         raise requests.exceptions.HTTPError(f"Error al obtener las canciones. Código de estado: {albums_result.status_code}")
 
-    albums_json = albums_result.json() 
-    songs_info = []
+#     albums_json = albums_result.json() 
+#     songs_info = []
 
-    for album in albums_json['items']:
-        album_id = album['id']
-        tracks_url = f"{os.getenv('API_SPOTIFY')}/albums/{album_id}/tracks"
-        tracks_result = requests.get(tracks_url, headers=headers)
-        tracks_json = tracks_result.json()
+#     for album in albums_json['items']:
+#         album_id = album['id']
+#         tracks_url = f"{os.getenv('API_SPOTIFY')}/albums/{album_id}/tracks"
+#         tracks_result = requests.get(tracks_url, headers=headers)
+#         tracks_json = tracks_result.json()
 
-        for track in tracks_json['items']:
-            track_id = track['id']
-            track_details = get_track_details(token, track_id) 
-            isrc = track_details.get('external_ids', {}).get('isrc', 'Sin datos')
-            spotify_url = track_details['external_urls']['spotify']
-            song_links = get_song_links(spotify_url)
+#         for track in tracks_json['items']:
+#             track_id = track['id']
+#             track_details = get_track_details(token, track_id) 
+#             isrc = track_details.get('external_ids', {}).get('isrc', 'Sin datos')
+#             spotify_url = track_details['external_urls']['spotify']
+#             song_links = get_song_links(spotify_url)
 
-            song_data = {
-                'song_id': track_id,
-                'song_name': track['name'],
-                'interpreters_name': ", ".join([artist['name'] for artist in track['artists']]),
-                'composers_name': 'N/A', # Spotify API does not provide composer information
-                'producers_name': 'N/A', # Spotify API does not provide composer information
-                'duration': track['duration_ms'],
-                'release_date': album['release_date'],
-                'isrc': isrc,
-                'popularity': track_details['popularity'],
-                'spotify_url': spotify_url,
-                'itunes_link': song_links['itunes_link'] if song_links['itunes_link'] else 'Sin datos',
-                'tidal_link': song_links['tidal_link'] if song_links['tidal_link'] else 'Sin datos',
-                'amazon_link': song_links['amazon_link'] if song_links['amazon_link'] else 'Sin datos',
-                'deezer_link': song_links['deezer_link'] if song_links['deezer_link'] else 'Sin datos',
-                'youtube_link': song_links['youtube_link'] if song_links['youtube_link'] else 'Sin datos',
-                'album_id': album_id
-            }
-            songs_info.append(song_data)
+#             song_data = {
+#                 'song_id': track_id,
+#                 'song_name': track['name'],
+#                 'interpreters_name': ", ".join([artist['name'] for artist in track['artists']]),
+#                 'composers_name': 'N/A', # Spotify API does not provide composer information
+#                 'producers_name': 'N/A', # Spotify API does not provide composer information
+#                 'duration': track['duration_ms'],
+#                 'release_date': album['release_date'],
+#                 'isrc': isrc,
+#                 'popularity': track_details['popularity'],
+#                 'spotify_url': spotify_url,
+#                 'itunes_link': song_links['itunes_link'] if song_links['itunes_link'] else 'Sin datos',
+#                 'tidal_link': song_links['tidal_link'] if song_links['tidal_link'] else 'Sin datos',
+#                 'amazon_link': song_links['amazon_link'] if song_links['amazon_link'] else 'Sin datos',
+#                 'deezer_link': song_links['deezer_link'] if song_links['deezer_link'] else 'Sin datos',
+#                 'youtube_link': song_links['youtube_link'] if song_links['youtube_link'] else 'Sin datos',
+#                 'album_id': album_id
+#             }
+#             songs_info.append(song_data)
 
-    return songs_info
+#     return songs_info
 
 def get_songs_from_album(token, album_id):
     """
@@ -224,13 +255,22 @@ def get_songs_from_album(token, album_id):
         isrc = track_details.get('external_ids', {}).get('isrc', 'Sin datos')
         spotify_url = track_details['external_urls']['spotify']
         song_links = get_song_links(spotify_url)
+        song_name = track['name']
+        artist_name = ", ".join([artist['name'] for artist in track['artists']])
+
+        try:
+            producers, writers = get_song_info_by_name_artist(song_name, artist_name)
+        except ValueError as e:
+            print(e)
+            producers = ['Sin datos']
+            writers = ['Sin datos']
 
         song_data = {
             'song_id': track_id,
             'song_name': track['name'],
             'interpreters_name': ", ".join([artist['name'] for artist in track['artists']]),
-            'composers_name': 'N/A', # Spotify API does not provide composer information
-            'producers_name': 'N/A', # Spotify API does not provide composer information
+            'composers_name': ", ".join(writers), 
+            'producers_name': ", ".join(producers), 
             'duration': track['duration_ms'],
             'release_date': track_details['album']['release_date'],
             'isrc': isrc,

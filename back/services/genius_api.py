@@ -1,4 +1,5 @@
 import requests
+import aiohttp
 
 # Define las credenciales de la API
 CLIENT_ACCESS_TOKEN = 'vLnNFS2n6OB0nh52yOeXlFavwNncl4dYx8Ea9zCeJJ6v-O99AdgP6wA4ptt-CwBA'
@@ -9,20 +10,21 @@ def get_song_info(song_id):
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        song_info = response.json()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Error al hacer la solicitud: {e}")
 
-    song_info = response.json()["response"]["song"]
-    producer = song_info["producer_artists"][0]["name"] if song_info["producer_artists"] else "Sin datos"
-    writer = song_info["writer_artists"][0]["name"] if song_info["writer_artists"] else "Sin datos"
-    return producer, writer
+    song_info = song_info["response"]["song"]
+    producers = [producer["name"] for producer in song_info["producer_artists"]] if song_info["producer_artists"] else ["Sin datos"]
+    writers = [writer["name"] for writer in song_info["writer_artists"]] if song_info["writer_artists"] else ["Sin datos"]
+    return producers, writers
 
 def search_song_artist_partial_match(song_name, artist_name):
     url = "https://api.genius.com/search"
     headers = {"Authorization": f"Bearer {CLIENT_ACCESS_TOKEN}"}
     params = {"q": f"{song_name} {artist_name}"}
     try:
-        response = requests.get(url, headers=headers, params=params, timeout=200)  # Add timeout argument
+        response = requests.get(url, headers=headers, params=params, timeout=400)  
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Error al hacer la solicitud: {e}")
@@ -40,8 +42,3 @@ def get_song_info_by_name_artist(song_name, artist_name):
     else:
         raise ValueError(f"No se encontró la canción: {song_name} por el artista: {artist_name}")
 
-# Prueba la función con el nombre de una canción
-try:
-    print(get_song_info_by_name_artist("Florecita Rockera", "Aterciopelados"))
-except ValueError as e:
-    print(e)
