@@ -13,9 +13,15 @@
       <small id="username-help">Puedes buscar por artista o nombre de una canción.</small>
     </div>
 
+
+    <div class="input-artist">
+      <p-dropdown [options]="markets" [(ngModel)]="selectMarket" [filter]="true"  [showClear]="true" placeholder="Mercado"></p-dropdown>
+      <small id="username-help">Opcional.</small>
+    </div>
+
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
-    <p-button (onClick)="searchArt($event)" icon="pi pi-search" [rounded]="true" severity="success"></p-button>
+    <p-button (onClick)="searchArtist()" icon="pi pi-search" [rounded]="true" severity="success"></p-button>
     <p-button (onClick)="clear()" icon="pi pi-times" [rounded]="true" severity="danger"></p-button>
   </div>
 
@@ -25,41 +31,47 @@
     <p-table [value]="artistData" [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template pTemplate="header">
         <tr>
-          <th>Id</th>
+          <!-- <th>Id</th> -->
           <th>Nombre</th>
           <th>Seguidores</th>
           <th>Popularidad</th>
           <th>Álbumes</th>
-          <th>Canciones</th>
+          <th>Guardar en BD</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-product>
         <tr>
-          <td>{{ product.artist_id }}</td>
+          <!-- <td>{{ product.artist_id }}</td> -->
           <td>{{ product.artist_name }}</td>
           <td>{{ product.followers }}</td>
           <td>{{ product.popularity }}</td>
-          <td><p-button (onClick)="search($event, product.artist_id, 'álbumes')" icon="pi pi-search"
+          <td><p-button (onClick)="search($event, product.artist_id, '','álbumes')" icon="pi pi-search"
               severity="success"></p-button>
           </td>
-          <td><p-button (onClick)="search($event, product.artist_id, 'canciones')" icon="pi pi-search"
-              severity="success"></p-button>
-          </td>
+          <td><p-button (onClick)="saveArtist(product)" icon="pi pi-save"
+            severity="success"></p-button>
+        </td>
         </tr>
       </ng-template>
     </p-table>
   </div>
 
-  <h1>Álbumes</h1>
+  <div class="album-title">
+    <h1>Álbumes</h1> <p-button icon="pi pi-plus" (onClick)="questAlbum($event)" [rounded]="true" severity="success"></p-button>
+  </div>
   <div class="card">
     <p-table [value]="albumData" [paginator]="true" [rows]="5" [showCurrentPageReport]="true"
-      [tableStyle]="{ 'min-width': '50rem' }"
+      [tableStyle]="{ 'min-width': '50rem' }" [(selection)]="selectedAlbums" dataKey="album_id"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
       [rowsPerPageOptions]="[5, 10, 20]">
       <ng-template pTemplate="header">
         <tr>
+          <th style="width: 4rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
           <!-- <th style="width: 10%">ID del Álbum</th> -->
-          <th style="width: 20%">Nombre del Álbum</th>
+          <th style="width: 10%">Canciones</th>
+          <th pSortableColumn="album_name" style="width: 10%">Nombre del Álbum <p-sortIcon field="album_name"></p-sortIcon></th>
           <th style="width: 10%">Tipo de Álbum</th>
           <th style="width: 10%">Fecha de Lanzamiento</th>
           <!-- <th style="width: 10%">Mercados Disponibles</th> -->
@@ -68,12 +80,18 @@
           <th style="width: 10%">Imagen de Portada</th>
           <th style="width: 10%">UPC</th>
           <th style="width: 10%">Derechos de Autor C</th>
-          <th style="width: 20%">Derechos de Autor P</th>
+          <th style="width: 10%">Derechos de Autor P</th>
           <!-- <th style="width: 10%">ID del Artista</th> -->
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-album>
         <tr>
+          <td>
+            <p-tableCheckbox [value]="album"></p-tableCheckbox>
+          </td>
+          <td><p-button (click)="search($event, album.album_id, album.album_name ,'canciones')"
+              icon="pi pi-external-link" severity="success"></p-button>
+          </td>
           <!-- <td>{{ album.album_id }}</td> -->
           <td>{{ album.album_name }}</td>
           <td>{{ album.album_type }}</td>
@@ -82,7 +100,7 @@
           <td>{{ album.num_available_markets }}</td>
           <td>{{ album.popularity }}</td>
           <td class="break">
-            <a href="{{ album.cover_image }}">
+            <a href="{{ album.cover_image }}" target="_blank">
               <img class="cover" src="{{ album.cover_image }}" alt="Album Cover">
             </a>
           </td>
@@ -101,53 +119,57 @@
     </p-table>
   </div>
 
-  <h1>Canciones</h1>
-  <div class="card">
-    <p-table [value]="songsData" [paginator]="true" [rows]="5" [showCurrentPageReport]="true"
-      [tableStyle]="{ 'min-width': '50rem' }"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      [rowsPerPageOptions]="[5, 10, 20]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th style="width: 10%" >Nombre de la Canción</th>
-          <th style="width: 10%" >Intérprete</th>
-          <th style="width: 10%" >Compositores</th>
-          <th style="width: 10%" >Productores</th>
-          <th style="width: 10%" >Duración</th>
-          <th style="width: 10%" >Fecha de Lanzamiento</th>
-          <th style="width: 10%" >Popularidad</th>
-          <th style="width: 10%" >Spotify</th>
-          <th style="width: 10%" >iTunes</th>
-          <th style="width: 10%" >Tidal</th>
-          <th style="width: 10%" >Amazon</th>
-          <th style="width: 10%" >Deezer</th>
-          <th style="width: 10%" >YouTube</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-song>
-        <tr>
-          <td>{{ song.song_name }}</td>
-          <td>{{ song.interpreters_name }}</td>
-          <td>{{ song.composers_name }}</td>
-          <td>{{ song.producers_name }}</td>
-          <td>{{ song.duration }}</td>
-          <td>{{ song.release_date }}</td>
-          <td>{{ song.popularity }}</td>
-          <td><a href="{{ song.spotify_url }}" target="_blank">Spotify</a></td>
-          <td><a href="{{ song.itunes_link }}" target="_blank">iTunes</a></td>
-          <td><a href="{{ song.tidal_link }}" target="_blank">Tidal</a></td>
-          <td><a href="{{ song.amazon_link }}" target="_blank">Amazon</a></td>
-          <td><a href="{{ song.deezer_link }}" target="_blank">Deezer</a></td>
-          <td><a href="{{ song.youtube_link }}" target="_blank">YouTube</a></td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="paginatorleft">
-        <p-button type="button" icon="pi pi-plus" styleClass="p-button-text"></p-button>
-      </ng-template>
-      <ng-template pTemplate="paginatorright">
-        <p-button type="button" icon="pi pi-cloud" styleClass="p-button-text"></p-button>
-      </ng-template>
-    </p-table>
-  </div>
 
+
+  <p-dialog header="{{albumSelect}}" [(visible)]="visible" [modal]="true" [style]="{ width: '50vw' }"
+    [draggable]="false" [resizable]="false">
+    <h1>Canciones</h1>
+    <div class="card">
+      <p-table [value]="songsData" [paginator]="true" [rows]="5" [showCurrentPageReport]="true"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[5, 10, 20]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="song_name" style="width: 10%">Nombre de la Canción <p-sortIcon field="song_name"></p-sortIcon></th>
+            <th style="width: 10%">Intérprete</th>
+            <th style="width: 10%">Compositores</th>
+            <th style="width: 10%">Productores</th>
+            <th style="width: 10%">Duración</th>
+            <th style="width: 10%">Fecha de Lanzamiento</th>
+            <th style="width: 10%">Popularidad</th>
+            <th style="width: 10%">Spotify</th>
+            <th style="width: 10%">iTunes</th>
+            <th style="width: 10%">Tidal</th>
+            <th style="width: 10%">Amazon</th>
+            <th style="width: 10%">Deezer</th>
+            <th style="width: 10%">YouTube</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-song>
+          <tr>
+            <td>{{ song.song_name }}</td>
+            <td>{{ song.interpreters_name }}</td>
+            <td>{{ song.composers_name }}</td>
+            <td>{{ song.producers_name }}</td>
+            <td>{{ song.duration }}</td>
+            <td>{{ song.release_date }}</td>
+            <td>{{ song.popularity }}</td>
+            <td><a href="{{ song.spotify_url }}" target="_blank">Spotify</a></td>
+            <td><a href="{{ song.itunes_link }}" target="_blank">iTunes</a></td>
+            <td><a href="{{ song.tidal_link }}" target="_blank">Tidal</a></td>
+            <td><a href="{{ song.amazon_link }}" target="_blank">Amazon</a></td>
+            <td><a href="{{ song.deezer_link }}" target="_blank">Deezer</a></td>
+            <td><a href="{{ song.youtube_link }}" target="_blank">YouTube</a></td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="paginatorleft">
+          <p-button type="button" icon="pi pi-plus" styleClass="p-button-text"></p-button>
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+          <p-button type="button" icon="pi pi-cloud" styleClass="p-button-text"></p-button>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-dialog>
 </div>

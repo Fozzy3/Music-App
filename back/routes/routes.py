@@ -63,13 +63,13 @@ def get_artist_albums_songs_route(artist_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-# @music.get("/spotify_songs/{artist_id}", response_model=List[SongInfo], tags=["SpotifySongs"])
-# def get_song_data_route(artist_id: str):
-#     try:
-#         song_data = get_song_data(artist_id)
-#         return song_data
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=str(e)) from e
+@music.get("/spotify_songs/{album_id}", response_model=List[SongInfo], tags=["SpotifySongs"])
+def get_song_data_route(album_id: str):
+    try:
+        song_data = get_song_data_album(album_id)
+        return song_data
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 #Guardado de datos en la base de datos
 

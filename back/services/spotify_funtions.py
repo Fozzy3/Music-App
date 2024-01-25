@@ -84,7 +84,7 @@ def get_artists(token, artist_name, market=None):
         raise ValueError("La variable de entorno API_SPOTIFY no está configurada.")
     
     headers = get_auth_header(token)
-    query = f"?q={artist_name}&type=artist&limit=10"
+    query = f"?q={artist_name}&type=artist&limit=5"
     
     if market is not None:
         query += f"&market={market}"
@@ -241,7 +241,7 @@ def get_songs_from_album(token, album_id):
     url = f"{os.getenv('API_SPOTIFY')}/albums/{album_id}/tracks"
     headers = get_auth_header(token)
 
-    tracks_result = requests.get(url, headers=headers, timeout=600)
+    tracks_result = requests.get(url, headers=headers)
 
     if tracks_result.status_code != 200:
         raise requests.exceptions.HTTPError(f"Error al obtener las canciones. Código de estado: {tracks_result.status_code}")
@@ -261,7 +261,6 @@ def get_songs_from_album(token, album_id):
         try:
             producers, writers = get_song_info_by_name_artist(song_name, artist_name)
         except ValueError as e:
-            print(e)
             producers = ['Sin datos']
             writers = ['Sin datos']
 

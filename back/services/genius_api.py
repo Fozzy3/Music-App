@@ -24,7 +24,7 @@ def search_song_artist_partial_match(song_name, artist_name):
     headers = {"Authorization": f"Bearer {CLIENT_ACCESS_TOKEN}"}
     params = {"q": f"{song_name} {artist_name}"}
     try:
-        response = requests.get(url, headers=headers, params=params, timeout=400)  
+        response = requests.get(url, headers=headers, params=params)  
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Error al hacer la solicitud: {e}")

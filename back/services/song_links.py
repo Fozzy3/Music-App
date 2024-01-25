@@ -7,7 +7,7 @@ def get_song_links(spotify_url):
     """
     api_url = f"https://api.song.link/v1-alpha.1/links?url={spotify_url}"
     try:
-        response = requests.get(api_url, timeout=300)
+        response = requests.get(api_url)
         response.raise_for_status()  # Lanza una excepción si la respuesta contiene un código de estado HTTP de error
     except requests.exceptions.RequestException as e:
         print(f"Error al hacer la solicitud: {e}")
