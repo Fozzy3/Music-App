@@ -58,33 +58,20 @@ def save_song_data_to_db(song_data):
     db.execute(stmt)
     db.commit()
     
+
 #Verificación de existencia de datos en la base de datos
 
-def check_artist_exists_in_db(artist_id):
+def artist_exists_in_db(artist_data):
+    artist_id = artist_data['artist_id']
     db = SessionLocal()
     stmt = table_artists.select().where(table_artists.c.artist_id == artist_id)
     result = db.execute(stmt)
-    return result.rowcount > 0  # True si existe, False si no existe    
+    return result.rowcount > 0  # True si existe, False si no existe
 
-#Obtención de datos de la base de datos
-
-def get_album_info_from_db(artist_id):
+def album_exists_in_db(album_data):
+    album_id = album_data['album_id']
     db = SessionLocal()
-    stmt = table_albums.select().where(table_albums.c.artist_id == artist_id)
+    stmt = table_albums.select().where(table_albums.c.album_id == album_id)
     result = db.execute(stmt)
-    return result.fetchall()
+    return result.rowcount > 0  # True si existe, False si no existe
 
-def get_song_info_from_db(artist_id):
-    db = SessionLocal()
-    # Obtén los álbumes del artista
-    albums = get_album_info_from_db(artist_id)
-
-    # Para cada álbum, obtén las canciones
-    songs = []
-    for album in albums:
-        stmt = table_songs.select().where(table_songs.c.album_id == album['album_id'])
-        result = db.execute(stmt)
-        album_songs = result.fetchall()
-        songs.extend(album_songs)
-
-    return songs

@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, MetaData
 
-engine = create_engine("mysql+pymysql://music:music@localhost:3306/storedb")
+engine = create_engine("mysql+pymysql://root:music@localhost:3306/storedb")
 meta = MetaData()
 
 conn = engine.connect()
